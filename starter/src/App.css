@@ -175,3 +175,7 @@ body,
   text-align: center;
   font-size: 0.8em;
 }
+
+.shelf-selected { 
+  background-color: rgb(171, 255, 171);
+}
