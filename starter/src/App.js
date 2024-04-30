@@ -7,21 +7,43 @@ import Bookshelf from "./bookshelves/bookshelf";
 
 function App() {
   const [showSearchPage, setShowSearchpage] = useState(false);
-  const [books, setBooks] = useState([]); 
+  const [books, setBooks] = useState([]);
+  const [query, setQuery] = useState(''); 
+
 
   useEffect(() => {
     BooksAPI.getAll()
-      .then(books => {
-        setBooks(books);
-        console.log('All books:', books);
-      });
+      .then(bookID => {
+        setBooks(bookID);
+      }); 
+    
+    if (query) {
+      BooksAPI.search(query, 20)
+        .then(books => {
+          console.log(books)
+          if (books.error) {
+            setBooks([]);
+          } else {
+            setBooks(books);
+          }
+        });
+    }
+  }, [query]);
 
-    BooksAPI.get('bookId')
-      .then(book => {
-        console.log('Single book:', book);
-      });
-  }, []);
+  const onShelfChange = (book, newShelf) => {
+    BooksAPI.update(book, newShelf)
+    .then(() => {
+        book.shelf = newShelf;
+        const updatedBook = {...book, shelf: newShelf};
+        const updatedBooks = books.map(b => b.id === book.id ? updatedBook : b);
+        setBooks(updatedBooks);
+    });
+  }
 
+  const handleChange = (e) => {
+    setQuery(e.target.value);
+  }
+  
   return (
     <div className="app">
       {showSearchPage ? (
@@ -37,6 +59,8 @@ function App() {
               <input
                 type="text"
                 placeholder="Search by title, author, or ISBN"
+                value={query}
+                onChange={handleChange}
               />
             </div>
           </div>
@@ -51,9 +75,9 @@ function App() {
           </div>
           <div className="list-books-content">
             <div>
-              <Bookshelf books={books} shelf='currentlyReading' title='Currently Reading' />
-              <Bookshelf books={books} shelf='wantToRead' title='Want to Read' />
-              <Bookshelf books={books} shelf='read' title='Read' />
+              <Bookshelf books={books} shelf='currentlyReading' title='Currently Reading' onShelfChange={onShelfChange}/>
+              <Bookshelf books={books} shelf='wantToRead' title='Want to Read' onShelfChange={onShelfChange}/>
+              <Bookshelf books={books} shelf='read' title='Read' onShelfChange={onShelfChange}/>
             </div>
           </div>
           <div className="open-search">

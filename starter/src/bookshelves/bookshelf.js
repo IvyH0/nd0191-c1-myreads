@@ -1,8 +1,9 @@
-import React from 'react'; 
+import React, {useEffect} from 'react'; 
 
 import Book from '../bookCreation/createBook';
 
-const Bookshelf = ({books, shelf, title}) => {
+const Bookshelf = ({books, shelf, title, onShelfChange}) => {
+
     const filteredBooks = books.filter(book => book.shelf === shelf);
     return (
         <div className="bookshelf">
@@ -11,7 +12,7 @@ const Bookshelf = ({books, shelf, title}) => {
                 <ol className="books-grid">
                 {filteredBooks.map(book => (
                     <li key={book.id}>
-                        <Book book={book} />
+                        <Book book={book} onShelfChange={onShelfChange}/>
                     </li>
                 ))}
                 </ol>
