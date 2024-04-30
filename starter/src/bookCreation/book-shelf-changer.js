@@ -1,9 +1,6 @@
 import React from 'react'; 
-import * as BooksAPI from "../BooksAPI";
 
 const bookShelfChanger = ({book, onShelfChange}) => {
-
-
     const shelves = [
         {value: 'currentlyReading', label: 'Currently Reading'},
         {value: 'wantToRead', label: 'Want to Read'},

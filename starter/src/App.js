@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 
 //bookshelves 
 import Bookshelf from "./bookshelves/bookshelf";
+import SearchFunction from "./searchBar/searchFunction";
+import Book from "./bookCreation/createBook";
 
 function App() {
   const [showSearchPage, setShowSearchpage] = useState(false);
@@ -14,13 +16,14 @@ function App() {
   useEffect(() => {
     BooksAPI.getAll()
       .then(bookID => {
+        console.log(bookID)
         setBooks(bookID);
       }); 
     
     if (query) {
       BooksAPI.search(query, 20)
         .then(books => {
-          console.log(books)
+          console.log('searched books', books);
           if (books.error) {
             setBooks([]);
           } else {
@@ -44,6 +47,17 @@ function App() {
     setQuery(e.target.value);
   }
   
+  const search = query.trim().toLowerCase(); 
+  let filteredBooks = books; 
+  if (search.length > 0) {
+    filteredBooks = books.filter(book => {
+      return (
+        book.title.toLowerCase().includes(search) || 
+        (book.authors && book.authors.join('').toLowerCase().includes(search))
+      )
+    })
+  }
+
   return (
     <div className="app">
       {showSearchPage ? (
@@ -64,8 +78,15 @@ function App() {
               />
             </div>
           </div>
+          
           <div className="search-books-results">
-            <ol className="books-grid"></ol>
+          <ol className="books-grid">
+            {query && filteredBooks.map(book => (
+              <li key={book.id}>
+                <Book book={book} />
+              </li>
+            ))}
+          </ol>
           </div>
         </div>
       ) : (
