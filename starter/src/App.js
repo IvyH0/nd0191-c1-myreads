@@ -4,59 +4,78 @@ import { useEffect, useState } from "react";
 
 //bookshelves 
 import Bookshelf from "./bookshelves/bookshelf";
-import SearchFunction from "./searchBar/searchFunction";
 import Book from "./bookCreation/createBook";
 
 function App() {
   const [showSearchPage, setShowSearchpage] = useState(false);
   const [books, setBooks] = useState([]);
+  const [searchBooks, setSearchBooks] = useState([]);
   const [query, setQuery] = useState(''); 
 
 
-  useEffect(() => {
-    BooksAPI.getAll()
-      .then(bookID => {
-        console.log(bookID)
-        setBooks(bookID);
-      }); 
-    
-    if (query) {
-      BooksAPI.search(query, 20)
-        .then(books => {
-          console.log('searched books', books);
-          if (books.error) {
-            setBooks([]);
-          } else {
-            setBooks(books);
-          }
-        });
-    }
-  }, [query]);
+// Fetch all books when the component mounts
+useEffect(() => {
+  BooksAPI.getAll()
+    .then(bookID => {
+      setBooks(bookID);
+    }); 
+}, [showSearchPage]);
 
-  const onShelfChange = (book, newShelf) => {
-    BooksAPI.update(book, newShelf)
-    .then(() => {
-        book.shelf = newShelf;
-        const updatedBook = {...book, shelf: newShelf};
-        const updatedBooks = books.map(b => b.id === book.id ? updatedBook : b);
-        setBooks(updatedBooks);
-    });
-  }
+// Perform a search whenever the query changes
+useEffect(() => {
+  if (query) {
+    BooksAPI.search(query, 20)
+      .then(searchedBooks => {
+        if (searchedBooks.error) {
+          setSearchBooks([]);
+        } else {
+          const mergeSearchBooks = searchedBooks.map(searchedBook => {
+            const findBook = books.find(book => book.id === searchedBook.id);
+            return {
+              ...searchedBook, 
+              shelf: findBook ? findBook.shelf : 'none' 
+            }
+          })
 
-  const handleChange = (e) => {
-    setQuery(e.target.value);
+          setSearchBooks(mergeSearchBooks);
+        }
+      });
+  } else {
+    setSearchBooks([books]); // Set searchBooks to current books state when query is empty
   }
-  
-  const search = query.trim().toLowerCase(); 
-  let filteredBooks = books; 
-  if (search.length > 0) {
-    filteredBooks = books.filter(book => {
-      return (
-        book.title.toLowerCase().includes(search) || 
-        (book.authors && book.authors.join('').toLowerCase().includes(search))
-      )
-    })
-  }
+}, [query, books]); //seperate useEffects to avoid unnecessary API calls
+
+const onShelfChange = (book, newShelf) => {
+  BooksAPI.update(book, newShelf)
+  .then(() => {
+      // book.shelf = newShelf;
+      const updatedBook = {...book, shelf: newShelf};
+
+    //update current book state on main page
+    const updatedBooks = books.map(b => b.id === book.id ? updatedBook : b);
+    setBooks(updatedBooks);
+
+    //update search book state on search page
+    const updatedSearchedBooks = searchBooks.map(b => b.id === book.id ? updatedBook : b);
+    setSearchBooks(updatedSearchedBooks);
+
+  });
+}
+
+const handleChange = (e) => {
+  setQuery(e.target.value);
+}
+
+const search = query.trim().toLowerCase(); 
+let filteredBooks = searchBooks; 
+if (search.length > 0) {
+  filteredBooks = searchBooks.filter(book => {
+    return (
+      (book.title && book.title.toLowerCase().includes(search)) || 
+      (book.authors && book.authors.join('').toLowerCase().includes(search))
+    )
+  })
+}
 
   return (
     <div className="app">
@@ -83,7 +102,7 @@ function App() {
           <ol className="books-grid">
             {query && filteredBooks.map(book => (
               <li key={book.id}>
-                <Book book={book} />
+                <Book book={book} onShelfChange={onShelfChange}/>
               </li>
             ))}
           </ol>
