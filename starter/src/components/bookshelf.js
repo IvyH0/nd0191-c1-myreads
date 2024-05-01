@@ -1,6 +1,6 @@
 import React from 'react'; 
 
-import Book from '../bookCreation/createBook';
+import Book from './createBook';
 
 const Bookshelf = ({books, shelf, title, onShelfChange}) => {
 

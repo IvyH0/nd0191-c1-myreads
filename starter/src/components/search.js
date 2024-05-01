@@ -2,17 +2,20 @@ import React, { useState, useEffect } from 'react';
 import * as BooksAPI from '../BooksAPI';
 import { Link } from 'react-router-dom';
 
-import Book from '../bookCreation/createBook';
+import Book from './createBook';
 
 
-function SearchComponent ({onShelfChange, books, setShowSearchpage, showSearchPage}) {
+function SearchComponent ({onShelfChange, books}) {
     const [searchBooks, setSearchBooks] = useState([]);
     const [query, setQuery] = useState(''); 
 
     useEffect(() => {
-        if (query) {
-          BooksAPI.search(query, 20)
-            .then(searchedBooks => {
+      let isMounted = true; // add this line
+
+      if (query) {
+        BooksAPI.search(query, 20)
+          .then(searchedBooks => {
+            if (isMounted) { // add this line
               if (searchedBooks.error) {
                 setSearchBooks([]);
               } else {
@@ -23,14 +26,17 @@ function SearchComponent ({onShelfChange, books, setShowSearchpage, showSearchPa
                     shelf: findBook ? findBook.shelf : 'none' 
                   }
                 })
-      
+        
                 setSearchBooks(mergeSearchBooks);
               }
-            });
-        } else {
-          setSearchBooks([books]); // Set searchBooks to current books state when query is empty
-        }
-    }, [query, books]); //seperate useEffects to avoid unnecessary API calls
+            }
+          });
+      } else {
+        setSearchBooks([books]); // Set searchBooks to current books state when query is empty
+      }
+
+      return () => { isMounted = false; } // add this line
+    }, [query, books]);
 
     const onSearchShelfChange = (book, newShelf) => {
         // Update searchBooks state
@@ -62,7 +68,7 @@ function SearchComponent ({onShelfChange, books, setShowSearchpage, showSearchPa
             <Link
               to="/"
               className="close-search"
-              onClick={() => setShowSearchpage(!showSearchPage)}
+              // onClick={() => setShowSearchpage(!showSearchPage)}
             >
               Close
             </Link>
