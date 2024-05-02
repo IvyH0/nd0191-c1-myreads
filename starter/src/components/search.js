@@ -57,10 +57,11 @@ function SearchComponent ({onShelfChange, books}) {
     if (search.length > 0) {
         filteredBooks = searchBooks.filter(book => {
             return (
-            (book.title && book.title.toLowerCase().includes(search)) || 
-            (book.authors && book.authors.join('').toLowerCase().includes(search))
+            (book.title && book.title.toLowerCase().includes(search)) ||
+            (book.subtitle && book.subtitle.toLowerCase().includes(search))
             )
         })
+      // console.log(searchBooks)
     }
     return (
         <div className="search-books">
@@ -68,7 +69,6 @@ function SearchComponent ({onShelfChange, books}) {
             <Link
               to="/"
               className="close-search"
-              // onClick={() => setShowSearchpage(!showSearchPage)}
             >
               Close
             </Link>
@@ -83,13 +83,17 @@ function SearchComponent ({onShelfChange, books}) {
           </div>
           
           <div className="search-books-results">
-          <ol className="books-grid">
-            {query && filteredBooks.map(book => (
-              <li key={book.id}>
-                <Book book={book} onShelfChange={onSearchShelfChange}/>
-              </li>
-            ))}
-          </ol>
+          {filteredBooks.length > 0 ? (
+            <ol className="books-grid">
+              {query && filteredBooks.map(book => (
+                <li key={book.id}>
+                  <Book book={book} onShelfChange={onSearchShelfChange}/>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <div>No books found</div>
+          )}
           </div>
         </div>
     )

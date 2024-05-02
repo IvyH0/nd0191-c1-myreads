@@ -11,13 +11,13 @@ const Book = ({book, onShelfChange}) => {
                 style={{
                     width: 128,
                     height: 193,
-                    backgroundImage: `url("${book.imageLinks ? book.imageLinks.thumbnail : ''}")`
+                    backgroundImage: `url("${book.imageLinks?.thumbnail || ''}")`
                 }}
                 ></div>
                 <BookShelfChanger book={book} onShelfChange={onShelfChange}/>
             </div>
             <div className="book-title">{book.title}</div>
-            <div className="book-authors">{book.authors ? book.authors.join(', ') : 'No authors'}</div>
+            <div className="book-authors">{book.authors?.join(', ') || 'No authors'}</div>
             
         </div>
     )
