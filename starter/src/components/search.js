@@ -21,18 +21,21 @@ function SearchComponent ({onShelfChange, books}) {
               } else {
                 const mergeSearchBooks = searchedBooks.map(searchedBook => {
                   const findBook = books.find(book => book.id === searchedBook.id);
+                  //check to see if book is found in my current books
                   return {
                     ...searchedBook, 
+                    // If a book is found, assigning the shelf of the found book to the shelf of the searched book
+                    // If no book is found, assigning 'none' to the shelf of the searched book
                     shelf: findBook ? findBook.shelf : 'none' 
                   }
                 })
-        
+                //using mergeSearchBooks for search page books instead of the original response returned by BooksAPI.search
                 setSearchBooks(mergeSearchBooks);
               }
             }
           });
       } else {
-        setSearchBooks([books]); // Set searchBooks to current books state when query is empty
+        setSearchBooks(books); // Set searchBooks to current books state when query is empty
       }
 
       return () => { isMounted = false; } // add this line
@@ -63,6 +66,7 @@ function SearchComponent ({onShelfChange, books}) {
         })
       // console.log(searchBooks)
     }
+
     return (
         <div className="search-books">
           <div className="search-books-bar">
